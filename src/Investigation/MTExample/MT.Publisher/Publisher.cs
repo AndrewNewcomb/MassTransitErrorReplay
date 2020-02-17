@@ -27,7 +27,7 @@ namespace Publisher
                 {
                     h.Username(argOptions.Username);
                     h.Password(argOptions.Password);
-                });
+                });             
             });
 
             bus.Start();

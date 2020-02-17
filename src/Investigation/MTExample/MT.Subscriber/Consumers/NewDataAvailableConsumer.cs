@@ -11,7 +11,7 @@ namespace Subscriber.Consumers
         {
             var msg = context.Message;
 
-            await Console.Out.WriteLineAsync($"\r\n{context.MessageId} - Received NewDataAvailable: {msg.Text}");
+            await Console.Out.WriteLineAsync($"\r\n{context.MessageId} - {context.ConversationId} - Received NewDataAvailable: {msg.Text}");
 
             if (msg.Text.Contains('e'))
             {
@@ -24,11 +24,11 @@ namespace Subscriber.Consumers
                 var retryAttempt = context.GetRetryAttempt();
                 if (msg.Text.Contains("ok") && retryAttempt > 1)
                 {
-                    Console.Out.WriteLine($"\t{context.MessageId} - Retry number {retryAttempt}, will treat as ok....");
+                    Console.Out.WriteLine($"{context.MessageId} - {context.ConversationId} --- Retry {retryAttempt}, will treat as ok.");
                 }
                 else
                 {
-                    Console.Out.WriteLine($"\t{context.MessageId} - Retry number {retryAttempt}, will THROW for text: {msg.Text}.");
+                    Console.Out.WriteLine($"{context.MessageId} - {context.ConversationId} --- Retry {retryAttempt}, will THROW.");
                     throw new ApplicationException($"Subscriber throws for text: {msg.Text}");
                 }
             }

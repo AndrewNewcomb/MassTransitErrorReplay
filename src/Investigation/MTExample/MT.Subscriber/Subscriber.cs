@@ -96,7 +96,7 @@ namespace Subscriber
                         {
                             var msg = context.Message;
 
-                            return Console.Out.WriteLineAsync($"{context.MessageId} - Fault<NewDataAvailable>: {msg.Message.Text}");
+                            return Console.Out.WriteLineAsync($"{context.MessageId} - {context.ConversationId} - Fault<NewDataAvailable>: {msg.Message.Text}");
                         });
                 });
             }

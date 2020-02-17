@@ -11,7 +11,7 @@ namespace Subscriber.Consumers
         {
             var msg = context.Message;
 
-            await Console.Out.WriteLineAsync($"{context.MessageId} - Received InitialProcessingCompleted: {msg.Text}.");
+            await Console.Out.WriteLineAsync($"{context.MessageId} - {context.ConversationId} - Received InitialProcessingCompleted: {msg.Text}.");
 
             await context.Publish<FinalProcessingCompleted>(new { Text = msg.Text });
         }

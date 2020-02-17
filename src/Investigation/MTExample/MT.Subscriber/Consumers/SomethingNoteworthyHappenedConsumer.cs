@@ -11,7 +11,7 @@ namespace Subscriber.Consumers
         {
             var msg = context.Message;
 
-            await Console.Out.WriteLineAsync($"{context.MessageId} - Received SomethingNoteworthyHappened: {msg.Text}");
+            await Console.Out.WriteLineAsync($"{context.MessageId} - {context.ConversationId} - Received SomethingNoteworthyHappened: {msg.Text}");
         }
     }
 }

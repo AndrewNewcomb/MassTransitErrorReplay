@@ -1,22 +1,25 @@
-#Setting up the container
+# Setting up the container
 
-##From the `/docker` folder build the image
+From the `/docker` folder build the image
 ```
 docker build -t rabbitmq_investigation .
 ```
 
-##Run the container
+## Run the container
 ```
 docker run -d --name rabbitmq_inv -p 5672:5672 -p 15672:15672 rabbitmq_investigation --restart unless-stopped
 ```
 
 You can then stop it with `docker stop rabbitmq_inv`, and start it again with `docker start rabbitmq_inv`
 
-#Rabbit MQ admin server is
+# Rabbit MQ admin server is
 `http://localhost:15672`
 
 # Publisher and subscriber
-## publisher command line parameters
+
+Messages can be published and received via the MT.Publisher and MT.Subscriber projects.
+
+## MT.Publisher command line parameters
   --host                    localhost
   --vhost                   vh1
   --name                    invPublisher
@@ -24,7 +27,7 @@ You can then stop it with `docker stop rabbitmq_inv`, and start it again with `d
   --password                PasswordRmq
   --queueName               test_queue
 
-## subscriber command line parameters
+## MT.Subscriber command line parameters
   --host                    localhost
   --vhost                   vh1
   --name                    invSubscriber
@@ -38,15 +41,14 @@ You can then stop it with `docker stop rabbitmq_inv`, and start it again with `d
   --disableFaultQueue       False
   --disableNoteworthyQueue  False
 
-## start publisher and subscribers
+## start the publisher and subscriber(s)
+cd src\Investigation\MTExample
 
-cd C:\Projects\Playpit\MassTransit\MassTransitErrorReplay\src\Investigation\MTExample
-
-Start powershell ".\MT.Publisher\bin\debug\netcoreapp3.0\MT.Publisher"
+start powershell "dotnet run --project .\MT.Publisher\MT.Publisher.csproj"
 
 ** these two share the same main queue **
-Start powershell ".\MT.Subscriber\bin\debug\netcoreapp3.0\MT.Subscriber --name invSubscriber1"
-Start powershell ".\MT.Subscriber\bin\debug\netcoreapp3.0\MT.Subscriber --name invSubscriber2 --disableQueue2LevelRetry"
+start powershell "dotnet run --project .\MT.Subscriber\MT.Subscriber.csproj --name invSubscriber1"
+start powershell "dotnet run --project .\MT.Subscriber\MT.Subscriber.csproj --name invSubscriber2 --disableQueue2LevelRetry"
 
 ** this is a different main queue **
-Start powershell ".\MT.Subscriber\bin\debug\netcoreapp3.0\MT.Subscriber --name invSubscriber3 --queueName test_queue3"
+start powershell "dotnet run --project .\MT.Subscriber\MT.Subscriber.csproj --name invSubscriber3 --queueName test_queue3"

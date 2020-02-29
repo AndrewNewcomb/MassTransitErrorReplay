@@ -53,16 +53,15 @@ You will need to create the database, and then add tables using the [create tabl
 The appsettings.json file also contains the queue configuration values. The default values match the defaults for the publisher and subscriber.
 
 # Running the apps
-`cd src\Investigation\MTExample`
+```
+cd src\Investigation\MTExample
 
-Start the publisher  
-`start powershell "dotnet run --project .\MT.Publisher\MT.Publisher.csproj"`
+start powershell "dotnet run --project .\MT.Publisher\MT.Publisher.csproj"
 
-Start the subscriber(s)  
-`start powershell "dotnet run --project .\MT.Subscriber\MT.Subscriber.csproj"`
+start powershell "dotnet run --project .\MT.Subscriber\MT.Subscriber.csproj"
 
-Start the scheduler  
-`start powershell "dotnet run --project .\MT.Subscriber\MT.Scheduler.csproj"`
+start powershell "dotnet run --project .\MT.Subscriber\MT.Scheduler.csproj"
+```
 
 You can have multiple subscribers running at the same time. This subscriber will share the same queues as the previous subscriber  
 `start powershell "dotnet run --project .\MT.Subscriber\MT.Subscriber.csproj --name invSubscriber2 --disableQueue2LevelRetry"`

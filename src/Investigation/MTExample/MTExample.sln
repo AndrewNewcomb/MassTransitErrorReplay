@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MT.Common", "MT.Common\MT.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MT.Subscriber", "MT.Subscriber\MT.Subscriber.csproj", "{8AEEEB8B-3639-48E5-B8CC-A9A2C5A35334}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MT.Scheduler", "MT.Scheduler\MT.Scheduler.csproj", "{9465B399-A5A7-490D-888D-C0C7494F2BD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{8AEEEB8B-3639-48E5-B8CC-A9A2C5A35334}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AEEEB8B-3639-48E5-B8CC-A9A2C5A35334}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8AEEEB8B-3639-48E5-B8CC-A9A2C5A35334}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9465B399-A5A7-490D-888D-C0C7494F2BD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9465B399-A5A7-490D-888D-C0C7494F2BD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9465B399-A5A7-490D-888D-C0C7494F2BD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9465B399-A5A7-490D-888D-C0C7494F2BD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

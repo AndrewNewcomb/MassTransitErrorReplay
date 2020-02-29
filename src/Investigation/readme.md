@@ -60,7 +60,7 @@ start powershell "dotnet run --project .\MT.Publisher\MT.Publisher.csproj"
 
 start powershell "dotnet run --project .\MT.Subscriber\MT.Subscriber.csproj"
 
-start powershell "dotnet run --project .\MT.Subscriber\MT.Scheduler.csproj"
+start powershell "dotnet run --project .\MT.Scheduler\MT.Scheduler.csproj"
 ```
 
 You can have multiple subscribers running at the same time. This subscriber will share the same queues as the previous subscriber  
@@ -83,6 +83,9 @@ This normal flow can be amended via the message content.
 If the received text contains the character 'f' it throws an exception. If the text also contains 'ok' it will fix after 2 retries. If the text does not contain 'ok' but does contain '2lr' it will fix after 2 second level retries via the quartz scheduler. This retry behaviour can be suppressed via the command line parameters `disableQueueRetry` and `disableQueue2LevelRetry` respectively. If none of the retries fix the message then it will appear in the error queue, and a fault event will be published which will go to the fault queue. Subscribers can be configured to not consume these fault events via the `disableFaultQueue` command line parameter. 
 
 If the receieved text contains the character 'e' then a `SomethingNoteworthyHappened` event is published. Subscribers can be configured to not consume these events via the `disableNoteworthyQueue` command line parameter. 
+
+Look at the differences in behaviour for text  'a', 'f', 'f e', 'f e ok' and 'f e 2lr'.  
+If the subscriber is started with the command line parameter `--disableQueueOutbox` and receives text 'f e' then lots of SomethingNoteworthyHappened events are published.
  
 ## Queues
 You can see the queue activity via the Rabbit MQ admin server, which is available at `http://localhost:15672`

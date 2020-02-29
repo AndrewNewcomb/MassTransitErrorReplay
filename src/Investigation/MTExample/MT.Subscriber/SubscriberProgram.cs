@@ -5,7 +5,7 @@ using System;
 
 namespace Subscriber
 {
-    public class Subscriber
+    public class SubscriberProgram
     {
         // see     "MassTransitErrorReplay\src\Investigation\readme.md"
 
@@ -64,8 +64,8 @@ namespace Subscriber
 
         private static void SetUpConsumers(SubscriberParams argOptions, MassTransit.RabbitMqTransport.IRabbitMqBusFactoryConfigurator sbc, MassTransit.RabbitMqTransport.IRabbitMqHost host) 
         {
-            sbc.UseInMemoryScheduler();
-            //sbc.UseMessageScheduler(new Uri($"rabbitmq://{argOptions.Host}/quartz"));
+            //sbc.UseInMemoryScheduler();
+            sbc.UseMessageScheduler(new Uri($"rabbitmq://{argOptions.Host}/quartz"));
 
             sbc.ReceiveEndpoint(argOptions.QueueName, ep =>
             {
@@ -130,6 +130,7 @@ namespace Subscriber
             Console.WriteLine("Special behaviours if received text contains...");
             Console.WriteLine("  'f' throws an exception if failure processing is on");
             Console.WriteLine("      (but if also contains 'ok' will fix after 2 retries when retries are enabled.");
+            Console.WriteLine("      (but if also contains '2lr' will fix after 2 retries when second level retries are enabled.");
             Console.WriteLine("  'e' publishes an event");
             Console.WriteLine("      Try 'fe' with outbox disabled (bad) and enabled (good)");
             Console.WriteLine("---------------------------");

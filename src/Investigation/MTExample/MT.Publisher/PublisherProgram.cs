@@ -4,7 +4,7 @@ using System;
 
 namespace Publisher
 {
-    public class Publisher
+    public class PublisherProgram
     {
         // see     "MassTransitErrorReplay\src\Investigation\readme.md"
 

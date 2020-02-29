@@ -21,14 +21,20 @@ namespace Subscriber.Consumers
 
             if (State.EnableFail && msg.Text.Contains('f'))
             {
+                var redeliveryAttempt = context.Headers.Get<int>("MT-Redelivery-Count", 0).Value;
+
                 var retryAttempt = context.GetRetryAttempt();
                 if (msg.Text.Contains("ok") && retryAttempt > 1)
                 {
-                    Console.Out.WriteLine($"{context.MessageId} - {context.ConversationId} --- Retry {retryAttempt}, will treat as ok.");
+                    Console.Out.WriteLine($"{context.MessageId} - {context.ConversationId} --- Retry {retryAttempt}, 2LR {redeliveryAttempt}, will treat as ok.");
+                }
+                else if (msg.Text.Contains("2lr") && redeliveryAttempt > 1 && retryAttempt > 1)
+                {
+                    Console.Out.WriteLine($"{context.MessageId} - {context.ConversationId} --- Retry {retryAttempt}, 2LR {redeliveryAttempt}, will treat as ok.");
                 }
                 else
                 {
-                    Console.Out.WriteLine($"{context.MessageId} - {context.ConversationId} --- Retry {retryAttempt}, will THROW.");
+                    Console.Out.WriteLine($"{context.MessageId} - {context.ConversationId} --- Retry {retryAttempt}, 2LR {redeliveryAttempt}, will THROW.");
                     throw new ApplicationException($"Subscriber throws for text: {msg.Text}");
                 }
             }

@@ -1,4 +1,4 @@
-FROM rabbitmq:3.10.0-rc.1-management
+FROM rabbitmq:3-management
 
 # Add initilisation shell script
 ADD init.sh /init.sh

@@ -1,14 +1,18 @@
 ﻿using Common;
-using MassTransit;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Publisher
 {
     public class PublisherProgram
     {
         // see     "MassTransitErrorReplay\src\Investigation\readme.md"
-
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Console.WriteLine($"PUBLISHER");
 
@@ -21,18 +25,18 @@ namespace Publisher
 
             DisplayParams(argOptions);
 
-            var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
-            {
-                var host = sbc.Host(argOptions.Host, argOptions.VHost, argOptions.Name, h =>
+            var host = Host.CreateDefaultBuilder(args)
+                .ConfigureServices(services =>
                 {
-                    h.Username(argOptions.Username);
-                    h.Password(argOptions.Password);
-                });             
-            });
+                    ConfigureMassTransit(services, argOptions);
+                })
+                .Build();
 
-            bus.Start();
+            await host.StartAsync();
 
             DisplayInfo();
+
+            var publisherEndpoint = host.Services.GetRequiredService<IPublishEndpoint>();
 
             Console.WriteLine();
             while (true) 
@@ -49,11 +53,30 @@ namespace Publisher
                 }
                 else if (!string.IsNullOrWhiteSpace(line))
                 {
-                    bus.Publish<NewDataAvailable>(new { Text = line });
+                    await publisherEndpoint.Publish<NewDataAvailable>(new { Text = line });
                 }
             }
 
-            bus.Stop();
+            publisherEndpoint = null;
+
+            await host.StopAsync();
+        }
+
+        private static IServiceCollection ConfigureMassTransit(IServiceCollection services, PublisherParams argOptions)
+        {
+            services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(argOptions.Host, argOptions.VHost, argOptions.Name, h =>
+                    {
+                        h.Username(argOptions.Username);
+                        h.Password(argOptions.Password);
+                    });
+                });
+            });
+
+            return services;
         }
 
         private static void DisplayParams(PublisherParams parms)

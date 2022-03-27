@@ -80,7 +80,7 @@ The normal message flow is
 
 This normal flow can be amended via the message content. 
 
-If the received text contains the character 'f' it throws an exception. If the text also contains 'ok' it will fix after two retries. If the text does not contain 'ok' but does contain '2lr' it will fix after two second level retries via the quartz scheduler. This retry behaviour can be suppressed via the command line parameters `disableQueueRetry` and `disableQueue2LevelRetry` respectively. If none of the retries fix the message then it will appear in the error queue, and a fault event will be published which will go to the fault queue. Subscribers can be configured to not consume these fault events via the `disableFaultQueue` command line parameter. 
+If the received text contains the character 'f' it throws an exception. If the text also contains 'ok' it will fix after 2 retries. If the text does not contain 'ok' but does contain '2lr' it will fix after 2 second level retries via the quartz scheduler. This retry behaviour can be suppressed via the command line parameters `disableQueueRetry` and `disableQueue2LevelRetry` respectively. If none of the retries fix the message then it will appear in the error queue, and a fault event will be published which will go to the fault queue. Subscribers can be configured to not consume these fault events via the `disableFaultQueue` command line parameter. 
 
 If the receieved text contains the character 'e' then a `SomethingNoteworthyHappened` event is published. Subscribers can be configured to not consume these events via the `disableNoteworthyQueue` command line parameter. 
 
@@ -88,7 +88,7 @@ Look at the differences in behaviour for text  'a', 'f', 'f e', 'f e ok' and 'f 
 If the subscriber is started with the command line parameter `--disableQueueOutbox` and receives text 'f e' then lots of SomethingNoteworthyHappened events are published.
  
 ## Queues
-You can see the queue activity via the Rabbit MQ admin server, which is available at `http://localhost:15672`. The default login for the admin interface is guest with a password of guest.
+You can see the queue activity via the Rabbit MQ admin server, which is available at `http://localhost:15672`
 
 The command line parameter `--queueName` sets the name of the main queue that is used. The default of `test_queue` gives the queue `test_queue` and its `test_queue_error`.    
 The `quartz` queue is used by the quartz scheduler for second level retries.  

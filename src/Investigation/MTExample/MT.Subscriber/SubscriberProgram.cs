@@ -1,7 +1,11 @@
 ﻿using Common;
-using GreenPipes;
-using MassTransit;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Subscriber
 {
@@ -9,7 +13,7 @@ namespace Subscriber
     {
         // see     "MassTransitErrorReplay\src\Investigation\readme.md"
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Console.WriteLine($"SUBSCRIBER");
 
@@ -25,18 +29,14 @@ namespace Subscriber
             
             State.EnableFail = true;
 
-            var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
-            {
-                var host = sbc.Host(argOptions.Host, argOptions.VHost, argOptions.Name, h =>
+            var host = Host.CreateDefaultBuilder(args)
+                .ConfigureServices(services =>
                 {
-                    h.Username(argOptions.Username);
-                    h.Password(argOptions.Password);
-                });
-
-                SetUpConsumers(argOptions, sbc, host);
-            });
-
-            bus.Start();
+                    ConfigureMassTransit(services, argOptions);
+                })
+                .Build();
+            
+            await host.StartAsync();
 
             DisplayInfo(State.EnableFail);
 
@@ -59,48 +59,63 @@ namespace Subscriber
                 }
             }
 
-            bus.Stop();
+            await host.StopAsync();
         }
 
-        private static void SetUpConsumers(SubscriberParams argOptions, MassTransit.RabbitMqTransport.IRabbitMqBusFactoryConfigurator sbc, MassTransit.RabbitMqTransport.IRabbitMqHost host) 
+        private static void ConfigureMassTransit(IServiceCollection services, SubscriberParams argOptions)
         {
-            //sbc.UseInMemoryScheduler();
-            sbc.UseMessageScheduler(new Uri($"rabbitmq://{argOptions.Host}/quartz"));
-
-            sbc.ReceiveEndpoint(argOptions.QueueName, ep =>
+            services.AddMassTransit(x =>
             {
-                if (!argOptions.DisableQueue2LevelRetry) ep.UseScheduledRedelivery(r => r.Intervals(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(5)));
-                if (!argOptions.DisableQueueRetry) ep.UseMessageRetry(r => r.Immediate(2));
-                if (argOptions.QueueIsExclusive) ep.ExclusiveConsumer = argOptions.QueueIsExclusive;
-                if (!argOptions.DisableQueueOutbox) ep.UseInMemoryOutbox();
-
-                ep.Consumer<Consumers.NewDataAvailableConsumer>();
-                ep.Consumer<Consumers.InitialProcessingCompletedConsumer>();
-                ep.Consumer<Consumers.FinalProcessingCompletedConsumer>();
-            });
-
-            if (!argOptions.DisableNoteworthyQueue)
-            {
-                sbc.ReceiveEndpoint("noteworthy_queue", ep =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
-                    ep.Consumer<Consumers.SomethingNoteworthyHappenedConsumer>();
-                });
-            }
+                    cfg.Host(argOptions.Host, argOptions.VHost, argOptions.Name, h =>
+                    {
+                        h.Username(argOptions.Username);
+                        h.Password(argOptions.Password);
+                    });
 
-            if (!argOptions.DisableFaultQueue)
-            {
-                sbc.ReceiveEndpoint("fault_queue", ep =>
-                {
-                    // can also declare handlers and consumer with a lambda
-                    ep.Handler<Fault<NewDataAvailable>>(context =>
+
+                    cfg.UseInMemoryScheduler();
+                    //cfg.UseMessageScheduler(new Uri($"rabbitmq://{argOptions.Host}/quartz"));
+
+                    cfg.ReceiveEndpoint(argOptions.QueueName, ep =>
+                    {
+                        if (!argOptions.DisableQueue2LevelRetry) ep.UseScheduledRedelivery(r => r.Intervals(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(5)));
+                        if (!argOptions.DisableQueueRetry) ep.UseMessageRetry(r => r.Immediate(2));
+                        if (argOptions.QueueIsExclusive) ep.ExclusiveConsumer = argOptions.QueueIsExclusive;
+                        if (argOptions.SingleActiveConsumer) ep.SingleActiveConsumer = argOptions.SingleActiveConsumer;
+                        if (!argOptions.DisableQueueOutbox) ep.UseInMemoryOutbox();
+
+                        ep.Consumer<Consumers.NewDataAvailableConsumer>();
+                        ep.Consumer<Consumers.InitialProcessingCompletedConsumer>();
+                        ep.Consumer<Consumers.FinalProcessingCompletedConsumer>();
+                    });
+
+                    if (!argOptions.DisableNoteworthyQueue)
+                    {
+                        cfg.ReceiveEndpoint("noteworthy_queue", ep =>
                         {
-                            var msg = context.Message;
-
-                            return Console.Out.WriteLineAsync($"{context.MessageId} - {context.ConversationId} - Fault<NewDataAvailable>: {msg.Message.Text}");
+                            ep.Consumer<Consumers.SomethingNoteworthyHappenedConsumer>();
                         });
+                    }
+
+                    if (!argOptions.DisableFaultQueue)
+                    {
+                        cfg.ReceiveEndpoint("fault_queue", ep =>
+                        {
+                            // can also declare handlers and consumer with a lambda
+                            ep.Handler<Fault<NewDataAvailable>>(context =>
+                            {
+                                var msg = context.Message;
+
+                                return Console.Out.WriteLineAsync($"{context.MessageId} - {context.ConversationId} - Fault<NewDataAvailable>: {msg.Message.Text}");
+                            });
+                        });
+                    }
                 });
-            }
+            });
         }
+
 
         private static void DisplayParams(SubscriberParams parms) 
         {
@@ -112,6 +127,7 @@ namespace Subscriber
             Console.WriteLine($"  --queueName               {parms.QueueName}");                             
             Console.WriteLine($"  --disableQueueOutbox      {parms.DisableQueueOutbox}");                        
             Console.WriteLine($"  --queueIsExclusive        {parms.QueueIsExclusive}");                      
+            Console.WriteLine($"  --singleActiveConsumer    {parms.SingleActiveConsumer}");                      
             Console.WriteLine($"  --disableQueueRetry       {parms.DisableQueueRetry}");                            
             Console.WriteLine($"  --disableQueue2LevelRetry {parms.DisableQueue2LevelRetry}");                      
             Console.WriteLine($"  --disableFaultQueue       {parms.DisableFaultQueue}");                     

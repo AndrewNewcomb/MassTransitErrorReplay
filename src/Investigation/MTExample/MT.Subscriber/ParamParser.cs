@@ -59,6 +59,10 @@ namespace Subscriber
                     {
                         (i, spar.QueueIsExclusive) = ph.SetSwitch(i);
                     }
+                    else if (lowerArg == "--singleactiveconsumer")
+                    {
+                        (i, spar.SingleActiveConsumer) = ph.SetSwitch(i);
+                    }
                     else if (lowerArg == "--disablequeueretry")
                     {
                         (i, spar.DisableQueueRetry) = ph.SetSwitch(i);

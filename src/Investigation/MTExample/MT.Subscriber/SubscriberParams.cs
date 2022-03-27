@@ -5,6 +5,7 @@
         public string Name { get; set; } = "invSubscriber";
         public bool DisableQueueOutbox { get; set; } = false;
         public bool QueueIsExclusive { get; set; } = false;
+        public bool SingleActiveConsumer { get; set; } = false;
         public bool DisableQueueRetry { get; set; } = false;
         public bool DisableQueue2LevelRetry { get; set; } = false;
         public bool DisableFaultQueue { get; set; } = false;
